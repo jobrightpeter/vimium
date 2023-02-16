@@ -217,6 +217,8 @@ const Commands = {
       "goNext",
       "nextFrame",
       "mainFrame",
+      "switchToSFClassic",
+      "switchToSFLightning",
       "Marks.activateCreateMode",
       "Marks.activateGotoMode"],
     vomnibarCommands:
@@ -304,6 +306,8 @@ const defaultKeyMappings = {
   "]]": "goNext",
   "gf": "nextFrame",
   "gF": "mainFrame",
+  "sc": "switchToSFClassic",
+  "sl": "switchToSFLightning",
   "gu": "goUp",
   "gU": "goToRoot",
   "i": "enterInsertMode",
@@ -418,6 +422,9 @@ const commandDescriptions = {
   // Navigating the URL hierarchy
   goUp: ["Go up the URL hierarchy"],
   goToRoot: ["Go to root of current URL hierarchy"],
+
+  switchToSFClassic: ["Switch to Salesforce classic"],
+  switchToSFLightning: ["Switch to Salesforce lightning"],
 
   // Manipulating tabs
   nextTab: ["Go one tab right", { background: true }],

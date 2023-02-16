@@ -44,6 +44,8 @@ Navigating the current page:
     yf      copy a link url to the clipboard
     gf      cycle forward to the next frame
     gF      focus the main/top frame
+    sc      switch to Salesforce classic
+    sl      switch to Salesforce lightning
 
 Navigating to new pages:
 

@@ -99,6 +99,14 @@ var NormalModeCommands = {
     window.location.href = window.location.origin;
   },
 
+  switchToSFClassic() {
+    window.location.href = window.location.origin + "/ltng/switcher?destination=classic";
+  },
+
+  switchToSFLightning() {
+    window.location.href = window.location.origin + "/ltng/switcher?destination=lex-campaign";
+  },
+
   toggleViewSource() {
     chrome.runtime.sendMessage({ handler: "getCurrentTabUrl" }, function(url) {
       if (url.substr(0, 12) === "view-source:") {
