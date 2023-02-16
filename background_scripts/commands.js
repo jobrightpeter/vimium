@@ -228,6 +228,7 @@ const Commands = {
       "Vomnibar.activateBookmarksInNewTab",
       "Vomnibar.activateTabSelection",
       "Vomnibar.activateEditUrl",
+      "Vomnibar.activateEditJiraUrl",
       "Vomnibar.activateEditUrlInNewTab"],
     findCommands: ["enterFindMode", "performFind", "performBackwardsFind"],
     historyNavigation:
@@ -267,6 +268,7 @@ const Commands = {
     "LinkHints.activateModeToDownloadLink",
     "Vomnibar.activateEditUrl",
     "Vomnibar.activateEditUrlInNewTab",
+    "Vomnibar.activateEditJiraUrl",
     "LinkHints.activateModeToOpenIncognito",
     "LinkHints.activateModeToCopyLinkUrl",
     "goNext",
@@ -333,6 +335,7 @@ const defaultKeyMappings = {
   "B": "Vomnibar.activateBookmarksInNewTab",
   "ge": "Vomnibar.activateEditUrl",
   "gE": "Vomnibar.activateEditUrlInNewTab",
+  "gj": "Vomnibar.activateEditJiraUrl",
 
   // Navigating history
   "H": "goBack",
@@ -457,6 +460,8 @@ const commandDescriptions = {
   "Vomnibar.activateBookmarksInNewTab": ["Open a bookmark in a new tab", { topFrame: true }],
   "Vomnibar.activateEditUrl": ["Edit the current URL", { topFrame: true }],
   "Vomnibar.activateEditUrlInNewTab": ["Edit the current URL and open in a new tab", { topFrame: true }],
+  "Vomnibar.activateEditJiraUrl": ["Open a JIRA ticket", { topFrame: true }],
+  
 
   nextFrame: ["Select the next frame on the page", { background: true }],
   mainFrame: ["Select the page's main/top frame", { topFrame: true, noRepeat: true }],

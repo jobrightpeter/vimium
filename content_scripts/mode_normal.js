@@ -285,7 +285,8 @@ if (typeof Vomnibar !== 'undefined') {
     "Vomnibar.activateBookmarks": Vomnibar.activateBookmarks.bind(Vomnibar),
     "Vomnibar.activateBookmarksInNewTab": Vomnibar.activateBookmarksInNewTab.bind(Vomnibar),
     "Vomnibar.activateEditUrl": Vomnibar.activateEditUrl.bind(Vomnibar),
-    "Vomnibar.activateEditUrlInNewTab": Vomnibar.activateEditUrlInNewTab.bind(Vomnibar)
+    "Vomnibar.activateEditUrlInNewTab": Vomnibar.activateEditUrlInNewTab.bind(Vomnibar),
+    "Vomnibar.activateEditJiraUrl": Vomnibar.activateEditJiraUrl.bind(Vomnibar)
   });
 }
 
