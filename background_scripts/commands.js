@@ -220,6 +220,8 @@ const Commands = {
       "switchToSFClassic",
       "switchToSFLightning",
       "toggleSFNoOverride",
+      "gmailSearchCurrentEmail",
+      "gmailUnreadPrimaryInbox",
       "Marks.activateCreateMode",
       "Marks.activateGotoMode"],
     vomnibarCommands:
@@ -314,6 +316,8 @@ const defaultKeyMappings = {
   "sc": "switchToSFClassic",
   "sl": "switchToSFLightning",
   "su": "toggleSFNoOverride",
+  "ee" : "gmailSearchCurrentEmail",
+  "eu" : "gmailUnreadPrimaryInbox",
   "gu": "goUp",
   "gU": "goToRoot",
   "i": "enterInsertMode",
@@ -434,6 +438,9 @@ const commandDescriptions = {
   switchToSFClassic: ["Switch to Salesforce classic"],
   switchToSFLightning: ["Switch to Salesforce lightning"],
   toggleSFNoOverride: ["Toggles NoOverride flag in Salesforce"],
+
+  gmailSearchCurrentEmail: ["Searches all email from the current sender in gmail"],
+  gmailUnreadPrimaryInbox: ["Lists all unread emails in the primary inbox in gmail"],
 
   // Manipulating tabs
   nextTab: ["Go one tab right", { background: true }],

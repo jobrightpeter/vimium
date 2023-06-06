@@ -114,18 +114,34 @@ var NormalModeCommands = {
       newUrl = theUrl.replace('nooverride=1','');
     }
     else if(theUrl.includes('id=')) {
-      // CONTINUE HERE.....
-      // CONTINUE HERE.....
-      // CONTINUE HERE.....
-      // CONTINUE HERE.....
-      // CONTINUE HERE.....
-      // CONTINUE HERE.....
+      newUrl = window.location.origin + '/' + window.location.href.match(/id=.{15}/)[0].substring(3) + '?nooverride=1';
     }
 
     if( newUrl != null) {
       window.location.href = newUrl;
     }
     //else do nothing
+  },
+
+  gmailSearchCurrentEmail() {
+
+    console.log('inside gmailSearchCurrentEmail');
+
+
+    let emailSpan =   document.querySelectorAll('span.go')[0];
+    if(emailSpan) {
+      let email = emailSpan.outerText.replace('<','').replace('>','');
+      window.location.href =  'https://mail.google.com/mail/u/0/#search/' + email;
+    }
+    else {
+      window.location.href = 'https://mail.google.com/mail/u/0/#search/in%3Ainbox+is%3Aunread+category%3Aprimary';
+    }
+
+  },
+
+  gmailUnreadPrimaryInbox() {
+    window.location.href = 'https://mail.google.com/mail/u/0/#search/in%3Ainbox+is%3Aunread+category%3Aprimary';
+
   },
 
   toggleViewSource() {
