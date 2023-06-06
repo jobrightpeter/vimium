@@ -107,6 +107,27 @@ var NormalModeCommands = {
     window.location.href = window.location.origin + "/ltng/switcher?destination=lex-campaign";
   },
 
+  toggleSFNoOverride() {
+    const theUrl = window.location.href;
+    let newUrl = null;
+    if(theUrl.includes('nooverride')) {
+      newUrl = theUrl.replace('nooverride=1','');
+    }
+    else if(theUrl.includes('id=')) {
+      // CONTINUE HERE.....
+      // CONTINUE HERE.....
+      // CONTINUE HERE.....
+      // CONTINUE HERE.....
+      // CONTINUE HERE.....
+      // CONTINUE HERE.....
+    }
+
+    if( newUrl != null) {
+      window.location.href = newUrl;
+    }
+    //else do nothing
+  },
+
   toggleViewSource() {
     chrome.runtime.sendMessage({ handler: "getCurrentTabUrl" }, function(url) {
       if (url.substr(0, 12) === "view-source:") {
@@ -286,7 +307,8 @@ if (typeof Vomnibar !== 'undefined') {
     "Vomnibar.activateBookmarksInNewTab": Vomnibar.activateBookmarksInNewTab.bind(Vomnibar),
     "Vomnibar.activateEditUrl": Vomnibar.activateEditUrl.bind(Vomnibar),
     "Vomnibar.activateEditUrlInNewTab": Vomnibar.activateEditUrlInNewTab.bind(Vomnibar),
-    "Vomnibar.activateEditJiraUrl": Vomnibar.activateEditJiraUrl.bind(Vomnibar)
+    "Vomnibar.activateEditJiraUrl": Vomnibar.activateEditJiraUrl.bind(Vomnibar),
+    "Vomnibar.activateEditUrlDomainOnly": Vomnibar.activateEditUrlDomainOnly.bind(Vomnibar)
   });
 }
 

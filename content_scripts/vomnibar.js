@@ -72,6 +72,16 @@ const Vomnibar = {
     });
   },
 
+  activateEditUrlDomainOnly(sourceFrameId) {
+    const pttrn = /^(https?:\/\/)?(www\.)?([^\/]+)/gm
+    const urlInfo = pttrn.exec(window.location.href);
+    return this.open(sourceFrameId, {
+      completer: "omni",
+      selectFirst: false,
+      query: urlInfo[0] + '/'
+    });
+  },
+
   init() {
     if (!this.vomnibarUI)
       this.vomnibarUI = new UIComponent("pages/vomnibar.html", "vomnibarFrame", function() {})

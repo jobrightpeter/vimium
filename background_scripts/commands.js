@@ -219,6 +219,7 @@ const Commands = {
       "mainFrame",
       "switchToSFClassic",
       "switchToSFLightning",
+      "toggleSFNoOverride",
       "Marks.activateCreateMode",
       "Marks.activateGotoMode"],
     vomnibarCommands:
@@ -229,6 +230,7 @@ const Commands = {
       "Vomnibar.activateTabSelection",
       "Vomnibar.activateEditUrl",
       "Vomnibar.activateEditJiraUrl",
+      "Vomnibar.activateEditUrlDomainOnly",
       "Vomnibar.activateEditUrlInNewTab"],
     findCommands: ["enterFindMode", "performFind", "performBackwardsFind"],
     historyNavigation:
@@ -269,6 +271,7 @@ const Commands = {
     "Vomnibar.activateEditUrl",
     "Vomnibar.activateEditUrlInNewTab",
     "Vomnibar.activateEditJiraUrl",
+    "Vomnibar.activateEditUrlDomainOnly",
     "LinkHints.activateModeToOpenIncognito",
     "LinkHints.activateModeToCopyLinkUrl",
     "goNext",
@@ -310,6 +313,7 @@ const defaultKeyMappings = {
   "gF": "mainFrame",
   "sc": "switchToSFClassic",
   "sl": "switchToSFLightning",
+  "su": "toggleSFNoOverride",
   "gu": "goUp",
   "gU": "goToRoot",
   "i": "enterInsertMode",
@@ -336,6 +340,7 @@ const defaultKeyMappings = {
   "ge": "Vomnibar.activateEditUrl",
   "gE": "Vomnibar.activateEditUrlInNewTab",
   "gj": "Vomnibar.activateEditJiraUrl",
+  "gd": "Vomnibar.activateEditUrlDomainOnly",
 
   // Navigating history
   "H": "goBack",
@@ -428,6 +433,7 @@ const commandDescriptions = {
 
   switchToSFClassic: ["Switch to Salesforce classic"],
   switchToSFLightning: ["Switch to Salesforce lightning"],
+  toggleSFNoOverride: ["Toggles NoOverride flag in Salesforce"],
 
   // Manipulating tabs
   nextTab: ["Go one tab right", { background: true }],
@@ -461,6 +467,7 @@ const commandDescriptions = {
   "Vomnibar.activateEditUrl": ["Edit the current URL", { topFrame: true }],
   "Vomnibar.activateEditUrlInNewTab": ["Edit the current URL and open in a new tab", { topFrame: true }],
   "Vomnibar.activateEditJiraUrl": ["Open a JIRA ticket", { topFrame: true }],
+  "Vomnibar.activateEditUrlDomainOnly": ["Edit the current URL", { topFrame: true }],
   
 
   nextFrame: ["Select the next frame on the page", { background: true }],
