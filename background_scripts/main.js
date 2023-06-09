@@ -328,6 +328,7 @@ const BackgroundCommands = {
   closeTabsOnLeft(request) { return removeTabsRelative("before", request); },
   closeTabsOnRight(request) { return removeTabsRelative("after", request); },
   closeOtherTabs(request) { return removeTabsRelative("both", request); },
+  closeTabsOfSameDomain(request) { return removeTabsOfSameDomain("after", request); },
 
   visitPreviousTab({count, tab}) {
     const tabIds = BgUtils.tabRecency.getTabsByRecency().filter(tabId => tabId !== tab.id);
@@ -373,6 +374,30 @@ var removeTabsRelative = (direction, {tab: activeTab}) => chrome.tabs.query({cur
     } })();
 
   chrome.tabs.remove(tabs.filter(t => !t.pinned && shouldDelete(t.index))
+                     .map((t) => t.id));
+});
+
+
+// Remove all tabs with the same domain as the currently active tab
+var removeTabsOfSameDomain = (direction, {tab: activeTab}) => chrome.tabs.query({}, function(tabs) {
+
+  let url = new URL(activeTab.url);
+  let hostName = url.hostname;
+  let domainName = hostName.split('.').reverse().splice(0,2).reverse().join('.').length <= 5 ? hostName.split('.').reverse().splice(0,3).reverse().join('.') : hostName.split('.').reverse().splice(0,2).reverse().join('.');
+
+  const shouldDelete =
+    (() => { 
+
+      return function(t) {
+          let tabUrl = new URL(t.url);
+          let tabHostName = tabUrl.hostname;
+          let tabDomainName = tabHostName.split('.').reverse().splice(0,2).reverse().join('.').length <= 5 ? tabHostName.split('.').reverse().splice(0,3).reverse().join('.') : tabHostName.split('.').reverse().splice(0,2).reverse().join('.');
+        return tabDomainName == domainName;
+      }
+
+      })();
+
+  chrome.tabs.remove(tabs.filter(t => !t.pinned && shouldDelete(t))
                      .map((t) => t.id));
 });
 

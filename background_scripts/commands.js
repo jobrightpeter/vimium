@@ -252,6 +252,7 @@ const Commands = {
       "moveTabToNewWindow",
       "closeTabsOnLeft","closeTabsOnRight",
       "closeOtherTabs",
+      "closeTabsOfSameDomain",
       "moveTabLeft",
       "moveTabRight"],
     misc:
@@ -285,6 +286,7 @@ const Commands = {
     "closeTabsOnLeft",
     "closeTabsOnRight",
     "closeOtherTabs",
+    "closeTabsOfSameDomain",
     "enterVisualLineMode",
     "toggleViewSource",
     "passNextKey"]
@@ -462,6 +464,7 @@ const commandDescriptions = {
   closeTabsOnLeft: ["Close tabs on the left", {background: true, noRepeat: true}],
   closeTabsOnRight: ["Close tabs on the right", {background: true, noRepeat: true}],
   closeOtherTabs: ["Close all other tabs", {background: true, noRepeat: true}],
+  closeTabsOfSameDomain: ["Close all tabs with the same domain as the current tab", {background: true, noRepeat: true}],
 
   moveTabLeft: ["Move tab to the left", { background: true }],
   moveTabRight: ["Move tab to the right", { background: true }],
