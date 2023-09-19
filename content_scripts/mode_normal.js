@@ -129,8 +129,13 @@ var NormalModeCommands = {
 
 
     let emailSpan =   document.querySelectorAll('span.go')[0];
+    let emailSpan2 = document.querySelectorAll('span.gD')[0];
     if(emailSpan) {
       let email = emailSpan.outerText.replace('<','').replace('>','');
+      window.location.href =  'https://mail.google.com/mail/u/0/#search/' + email;
+    }
+    else if(emailSpan2) {
+      let email = emailSpan2.getAttribute('Email');
       window.location.href =  'https://mail.google.com/mail/u/0/#search/' + email;
     }
     else {
