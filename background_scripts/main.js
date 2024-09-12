@@ -38,19 +38,25 @@ const completers = {
   tabs: new MultiCompleter([completionSources.tabs]),
 };
 
-const onURLChange = (details) => {
+// A query dictionary for `chrome.tabs.query` that will return only the visible tabs.
+const visibleTabsQueryArgs = { currentWindow: true };
+if (BgUtils.isFirefox()) {
+  // Only Firefox supports hidden tabs.
+  visibleTabsQueryArgs.hidden = false;
+}
+
+function onURLChange(details) {
   // sendMessage will throw "Error: Could not establish connection. Receiving end does not exist."
   // if there is no Vimium content script loaded in the given tab. This can occur if the user
   // navigated to a page where Vimium doesn't have permissions, like chrome:// URLs. This error is
   // noisy and mysterious (it usually doesn't have a valid line number), so we silence it.
-  chrome.tabs.sendMessage(details.tabId, {
+  const message = {
     handler: "checkEnabledAfterURLChange",
     silenceLogging: true,
-  }, {
-    frameId: details.frameId,
-  })
+  };
+  chrome.tabs.sendMessage(details.tabId, message, { frameId: details.frameId })
     .catch(() => {});
-};
+}
 
 // Re-check whether Vimium is enabled for a frame when the URL changes without a reload.
 // There's no reliable way to detect when the URL has changed in the content script, so we
@@ -70,8 +76,11 @@ if (!globalThis.isUnitTests) {
   })();
 }
 
-const muteTab = (tab) => chrome.tabs.update(tab.id, { muted: !tab.mutedInfo.muted });
-const toggleMuteTab = (request, sender) => {
+function muteTab(tab) {
+  chrome.tabs.update(tab.id, { muted: !tab.mutedInfo.muted });
+}
+
+function toggleMuteTab(request, sender) {
   const currentTab = request.tab;
   const tabId = request.tabId;
   const registryEntry = request.registryEntry;
@@ -122,7 +131,18 @@ const toggleMuteTab = (request, sender) => {
     }
     muteTab(currentTab);
   }
-};
+}
+
+// Find a tab's actual index in a given tab array returned by chrome.tabs.query. In Firefox, there
+// may be hidden tabs, so tab.tabIndex may not be the actual index into the array of visible tabs.
+function getTabIndex(tab, tabs) {
+  // First check if the tab is where we expect it, to avoid searching the array.
+  if (tabs.length > tab.index && tabs[tab.index].index === tab.index) {
+    return tab.index;
+  } else {
+    return tabs.findIndex((t) => t.index === tab.index);
+  }
+}
 
 //
 // Selects the tab with the ID specified in request.id
@@ -136,19 +156,21 @@ async function selectSpecificTab(request) {
   await chrome.tabs.update(request.id, { active: true });
 }
 
-const moveTab = function ({ count, tab, registryEntry }) {
+function moveTab({ count, tab, registryEntry }) {
   if (registryEntry.command === "moveTabLeft") {
     count = -count;
   }
-  return chrome.tabs.query({ currentWindow: true }, function (tabs) {
+  return chrome.tabs.query(visibleTabsQueryArgs, function (tabs) {
     const pinnedCount = (tabs.filter((tab) => tab.pinned)).length;
     const minIndex = tab.pinned ? 0 : pinnedCount;
     const maxIndex = (tab.pinned ? pinnedCount : tabs.length) - 1;
+    // The tabs array index of the new position.
+    const moveIndex = Math.max(minIndex, Math.min(maxIndex, getTabIndex(tab, tabs) + count));
     return chrome.tabs.move(tab.id, {
-      index: Math.max(minIndex, Math.min(maxIndex, tab.index + count)),
+      index: tabs[moveIndex].index,
     });
   });
-};
+}
 
 // TODO(philc): Rename to createRepeatCommand.
 const mkRepeatCommand = (command) => (function (request) {
@@ -160,8 +182,36 @@ const mkRepeatCommand = (command) => (function (request) {
   }
 });
 
+function nextZoomLevel(currentZoom, steps) {
+  // Chrome's default zoom levels.
+  const chromeLevels = [0.25, 0.33, 0.5, 0.75, 0.8, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2, 2.5, 3, 4, 5];
+  // Firefox's default zoom levels.
+  const firefoxLevels = [0.3, 0.5, 0.67, 0.8, 0.9, 1, 1.1, 1.2, 1.33, 1.5, 1.7, 2, 2.4, 3, 4, 5];
+
+  let zoomLevels = chromeLevels; // Chrome by default
+  if (BgUtils.isFirefox()) {
+    zoomLevels = firefoxLevels;
+  }
+
+  if (steps === 0) { // Nothing
+    return currentZoom;
+  } else if (steps > 0) { // In
+    // Chrome sometimes returns values with floating point errors.
+    // Example: Chrome gives 0.32999999999999996 instead of 0.33.
+    currentZoom += 0.0000001; // This is needed to solve floating point bugs in Chrome.
+    const nextIndex = zoomLevels.findIndex((level) => level > currentZoom);
+    const floorIndex = nextIndex == -1 ? zoomLevels.length : nextIndex - 1;
+    return zoomLevels[Math.min(zoomLevels.length - 1, floorIndex + steps)];
+  } else if (steps < 0) { // Out
+    currentZoom -= 0.0000001; // This is needed to solve floating point bugs in Chrome.
+    let ceilIndex = zoomLevels.findIndex((level) => level >= currentZoom);
+    ceilIndex = ceilIndex == -1 ? zoomLevels.length : ceilIndex;
+    return zoomLevels[Math.max(0, ceilIndex + steps)];
+  }
+}
+
 // These are commands which are bound to keystrokes which must be handled by the background page.
-// They are mapped in commands.coffee.
+// They are mapped in commands.js.
 const BackgroundCommands = {
   // Create a new tab. Also, with:
   //     map X createTab http://www.bbc.com/news
@@ -231,8 +281,8 @@ const BackgroundCommands = {
   }),
 
   moveTabToNewWindow({ count, tab }) {
-    chrome.tabs.query({ currentWindow: true }, function (tabs) {
-      const activeTabIndex = tab.index;
+    chrome.tabs.query(visibleTabsQueryArgs, function (tabs) {
+      const activeTabIndex = getTabIndex(tab, tabs);
       const startTabIndex = Math.max(0, Math.min(activeTabIndex, tabs.length - count));
       [tab, ...tabs] = tabs.slice(startTabIndex, startTabIndex + count);
       chrome.windows.create({ tabId: tab.id, incognito: tab.incognito }, function (window) {
@@ -253,8 +303,8 @@ const BackgroundCommands = {
   lastTab(request) {
     return selectTab("last", request);
   },
-  removeTab({ count, tab }) {
-    return forCountTabs(count, tab, (tab) => {
+  async removeTab({ count, tab }) {
+    await forCountTabs(count, tab, (tab) => {
       // In Firefox, Ctrl-W will not close a pinned tab, but on Chrome, it will. We try to be
       // consistent with each browser's UX for pinned tabs.
       if (tab.pinned && BgUtils.isFirefox()) return;
@@ -264,12 +314,35 @@ const BackgroundCommands = {
   restoreTab: mkRepeatCommand((request, callback) =>
     chrome.sessions.restore(null, callback(request))
   ),
-  togglePinTab({ count, tab }) {
-    return forCountTabs(count, tab, (tab) => chrome.tabs.update(tab.id, { pinned: !tab.pinned }));
+  async togglePinTab({ count, tab }) {
+    await forCountTabs(count, tab, (tab) => {
+      chrome.tabs.update(tab.id, { pinned: !tab.pinned });
+    });
   },
   toggleMuteTab,
   moveTabLeft: moveTab,
   moveTabRight: moveTab,
+
+  async setZoom({ tabId, registryEntry }) {
+    const zoomLevel = registryEntry.optionList[0] ?? 1;
+    const newZoom = parseFloat(zoomLevel);
+    if (!isNaN(newZoom)) {
+      chrome.tabs.setZoom(tabId, newZoom);
+    }
+  },
+  async zoomIn({ count, tabId }) {
+    const currentZoom = await chrome.tabs.getZoom(tabId);
+    const newZoom = nextZoomLevel(currentZoom, count);
+    chrome.tabs.setZoom(tabId, newZoom);
+  },
+  async zoomOut({ count, tabId }) {
+    const currentZoom = await chrome.tabs.getZoom(tabId);
+    const newZoom = nextZoomLevel(currentZoom, -count);
+    chrome.tabs.setZoom(tabId, newZoom);
+  },
+  async zoomReset({ tabId }) {
+    chrome.tabs.setZoom(tabId, 0); // setZoom of 0 sets to the tab default.
+  },
 
   async nextFrame({ count, tabId }) {
     // We're assuming that these frames are returned in the order that they appear on the page. This
@@ -338,59 +411,56 @@ const BackgroundCommands = {
     }
   },
 
-  reload({ count, tabId, registryEntry, tab: { windowId } }) {
+  async reload({ count, tab, registryEntry }) {
     const bypassCache = registryEntry.options.hard != null ? registryEntry.options.hard : false;
-    return chrome.tabs.query({ windowId }, function (tabs) {
-      const position = (function () {
-        for (let index = 0; index < tabs.length; index++) {
-          const tab = tabs[index];
-          if (tab.id === tabId) return index;
-        }
-      })();
-      tabs = [...tabs.slice(position), ...tabs.slice(0, position)];
-      count = Math.min(count, tabs.length);
-      for (const tab of tabs.slice(0, count)) {
-        chrome.tabs.reload(tab.id, { bypassCache });
-      }
+    await forCountTabs(count, tab, (tab) => {
+      chrome.tabs.reload(tab.id, { bypassCache });
+    });
+  },
+
+  async hardReload({ count, tab }) {
+    await forCountTabs(count, tab, (tab) => {
+      chrome.tabs.reload(tab.id, { bypassCache: true });
     });
   },
 };
 
-const forCountTabs = (count, currentTab, callback) =>
-  chrome.tabs.query({ currentWindow: true }, function (tabs) {
-    const activeTabIndex = currentTab.index;
-    const startTabIndex = Math.max(0, Math.min(activeTabIndex, tabs.length - count));
-    for (const tab of tabs.slice(startTabIndex, startTabIndex + count)) {
-      callback(tab);
-    }
-  });
+async function forCountTabs(count, currentTab, callback) {
+  const tabs = await chrome.tabs.query(visibleTabsQueryArgs);
+  const activeTabIndex = getTabIndex(currentTab, tabs);
+  const startTabIndex = Math.max(0, Math.min(activeTabIndex, tabs.length - count));
+  for (const tab of tabs.slice(startTabIndex, startTabIndex + count)) {
+    callback(tab);
+  }
+}
 
 // Remove tabs before, after, or either side of the currently active tab
-const removeTabsRelative = async (direction, { count, tab }) => {
+async function removeTabsRelative(direction, { count, tab }) {
   // count is null if the user didn't type a count prefix before issuing this command and didn't
   // specify a count=n option in their keymapping settings. Interpret this as closing all tabs on
   // either side.
   if (count == null) count = 99999;
   const activeTab = tab;
-  const tabs = await chrome.tabs.query({ currentWindow: true });
-  const toRemove = tabs.filter((tab) => {
+  const tabs = await chrome.tabs.query(visibleTabsQueryArgs);
+  const activeIndex = getTabIndex(activeTab, tabs);
+  const toRemove = tabs.filter((tab, tabIndex) => {
     if (tab.pinned || tab.id == activeTab.id) {
       return false;
     }
     switch (direction) {
       case "before":
-        return tab.index < activeTab.index &&
-          tab.index >= activeTab.index - count;
+        return tabIndex < activeIndex &&
+          tabIndex >= activeIndex - count;
       case "after":
-        return tab.index > activeTab.index &&
-          tab.index <= activeTab.index + count;
+        return tabIndex > activeIndex &&
+          tabIndex <= activeIndex + count;
       case "both":
         return true;
     }
   });
 
   await chrome.tabs.remove(toRemove.map((t) => t.id));
-};
+}
 
 
 // Remove all tabs with the same domain as the currently active tab
@@ -418,15 +488,15 @@ var removeTabsOfSameDomain = (direction, {tab: activeTab}) => chrome.tabs.query(
 
 // Selects a tab before or after the currently selected tab.
 // - direction: "next", "previous", "first" or "last".
-const selectTab = (direction, { count, tab }) =>
-  chrome.tabs.query({ currentWindow: true }, function (tabs) {
+function selectTab(direction, { count, tab }) {
+  chrome.tabs.query(visibleTabsQueryArgs, function (tabs) {
     if (tabs.length > 1) {
       const toSelect = (() => {
         switch (direction) {
           case "next":
-            return (tab.index + count) % tabs.length;
+            return (getTabIndex(tab, tabs) + count) % tabs.length;
           case "previous":
-            return ((tab.index - count) + (count * tabs.length)) % tabs.length;
+            return ((getTabIndex(tab, tabs) - count) + (count * tabs.length)) % tabs.length;
           case "first":
             return Math.min(tabs.length - 1, count - 1);
           case "last":
@@ -436,6 +506,7 @@ const selectTab = (direction, { count, tab }) =>
       chrome.tabs.update(tabs[toSelect].id, { active: true });
     }
   });
+}
 
 chrome.webNavigation.onCommitted.addListener(async ({ tabId, frameId }) => {
   // Vimium can't run on all tabs (e.g. chrome:// URLs). insertCSS will throw an error on such tabs,
@@ -626,7 +697,7 @@ const sendRequestHandlers = {
         whichIcon = "enabled";
       }
 
-      const iconSet = {
+      let iconSet = {
         "enabled": {
           "16": "../icons/action_enabled_16.png",
           "32": "../icons/action_enabled_32.png",
@@ -640,6 +711,16 @@ const sendRequestHandlers = {
           "32": "../icons/action_disabled_32.png",
         },
       };
+
+      if (BgUtils.isFirefox()) {
+        // Only Firefox supports SVG icons.
+        iconSet = {
+          "enabled": "../icons/action_enabled.svg",
+          "partial": "../icons/action_partial.svg",
+          "disabled": "../icons/action_disabled.svg",
+        };
+      }
+
       chrome.action.setIcon({ path: iconSet[whichIcon], tabId: sender.tab.id });
     }
 
@@ -768,7 +849,7 @@ function majorVersionHasIncreased(previousVersion) {
 }
 
 // Show notification on upgrade.
-const showUpgradeMessageIfNecessary = async function (onInstalledDetails) {
+async function showUpgradeMessageIfNecessary(onInstalledDetails) {
   const currentVersion = Utils.getCurrentVersion();
   // We do not show an upgrade message for patch/silent releases. Such releases have the same
   // major and minor version numbers.
@@ -784,7 +865,7 @@ const showUpgradeMessageIfNecessary = async function (onInstalledDetails) {
     notificationId,
     {
       type: "basic",
-      iconUrl: chrome.runtime.getURL("icons/vimium.png"),
+      iconUrl: chrome.runtime.getURL("icons/icon128.png"),
       title: "Vimium Upgrade",
       message:
         `Vimium has been upgraded to version ${currentVersion}. Click here for more information.`,
@@ -803,7 +884,7 @@ const showUpgradeMessageIfNecessary = async function (onInstalledDetails) {
       });
     });
   }
-};
+}
 
 async function injectContentScriptsAndCSSIntoExistingTabs() {
   const manifest = chrome.runtime.getManifest();
@@ -882,6 +963,7 @@ Object.assign(globalThis, {
   HintCoordinator,
   BackgroundCommands,
   majorVersionHasIncreased,
+  nextZoomLevel,
 });
 
 // The chrome.runtime.onStartup and onInstalled events are not fired when disabling and then

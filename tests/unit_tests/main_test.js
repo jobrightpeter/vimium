@@ -40,6 +40,114 @@ context("HintCoordinator", () => {
   });
 });
 
+context("Next zoom level", () => {
+  // NOTE: All these tests use the Chrome zoom levels, which are the default!
+  should("Zoom in 0 times", async () => {
+    const count = 0;
+    const currentZoom = 1.00;
+    const nextZoom = await nextZoomLevel(currentZoom, count);
+    assert.equal(1.00, nextZoom);
+  });
+
+  should("Zoom in 1", async () => {
+    const count = 1;
+    const currentZoom = 1.00;
+    const nextZoom = await nextZoomLevel(currentZoom, count);
+    assert.equal(1.10, nextZoom);
+  });
+
+  should("Zoom out 1", async () => {
+    const count = -1;
+    const currentZoom = 1.00;
+    const nextZoom = await nextZoomLevel(currentZoom, count);
+    assert.equal(0.90, nextZoom);
+  });
+
+  should("Zoom in 2", async () => {
+    const count = 2;
+    const currentZoom = 1.00;
+    const nextZoom = await nextZoomLevel(currentZoom, count);
+    assert.equal(1.25, nextZoom);
+  });
+
+  should("Zoom out 2", async () => {
+    const count = -2;
+    const currentZoom = 1.00;
+    const nextZoom = await nextZoomLevel(currentZoom, count);
+    assert.equal(0.80, nextZoom);
+  });
+
+  should("Zoom in from between values", async () => {
+    const count = 1;
+    const currentZoom = 1.05;
+    const nextZoom = await nextZoomLevel(currentZoom, count);
+    assert.equal(1.10, nextZoom);
+  });
+
+  should("Zoom out from between values", async () => {
+    const count = -1;
+    const currentZoom = 1.05;
+    const nextZoom = await nextZoomLevel(currentZoom, count);
+    assert.equal(1.00, nextZoom);
+  });
+
+  should("Zoom in past the maximum", async () => {
+    const count = 15;
+    const currentZoom = 1.00;
+    const nextZoom = await nextZoomLevel(currentZoom, count);
+    assert.equal(5.00, nextZoom);
+  });
+
+  should("Zoom out past the minimum", async () => {
+    const count = -15;
+    const currentZoom = 1.00;
+    const nextZoom = await nextZoomLevel(currentZoom, count);
+    assert.equal(0.25, nextZoom);
+  });
+
+  should("Zoom in from below the minimum", async () => {
+    const count = 1;
+    const currentZoom = 0.01; // lowest non-broken Chrome zoom level
+    const nextZoom = await nextZoomLevel(currentZoom, count);
+    assert.equal(0.25, nextZoom);
+  });
+
+  should("Zoom out from above the maximum", async () => {
+    const count = -1;
+    const currentZoom = 9.99; // highest non-broken Chrome zoom level
+    const nextZoom = await nextZoomLevel(currentZoom, count);
+    assert.equal(5.00, nextZoom);
+  });
+
+  should("Zoom in from above the maximum", async () => {
+    const count = 1;
+    const currentZoom = 9.99; // highest non-broken Chrome zoom level
+    const nextZoom = await nextZoomLevel(currentZoom, count);
+    assert.equal(5.00, nextZoom);
+  });
+
+  should("Zoom out from below the minimum", async () => {
+    const count = -1;
+    const currentZoom = 0.01; // lowest non-broken Chrome zoom level
+    const nextZoom = await nextZoomLevel(currentZoom, count);
+    assert.equal(0.25, nextZoom);
+  });
+
+  should("Test Chrome 33% zoom in with float error", async () => {
+    const count = 1;
+    const currentZoom = 0.32999999999999996; // The value chrome actually gives for 33%.
+    const nextZoom = await nextZoomLevel(currentZoom, count);
+    assert.equal(0.50, nextZoom);
+  });
+
+  should("Test Chrome 175% zoom in with float error", async () => {
+    const count = 1;
+    const currentZoom = 1.7499999999999998; // The value chrome actually gives for 175%.
+    const nextZoom = await nextZoomLevel(currentZoom, count);
+    assert.equal(2.00, nextZoom);
+  });
+});
+
 context("Selecting frames", () => {
   should("nextFrame", async () => {
     const focusedFrames = [];
