@@ -337,6 +337,11 @@ const Commands = {
       "goNext",
       "nextFrame",
       "mainFrame",
+      "switchToSFClassic",
+      "switchToSFLightning",
+      "toggleSFNoOverride",      
+      "gmailSearchCurrentEmail",
+      "gmailUnreadPrimaryInbox",      
       "Marks.activateCreateMode",
       "Marks.activateGotoMode",
     ],
@@ -347,6 +352,8 @@ const Commands = {
       "Vomnibar.activateBookmarksInNewTab",
       "Vomnibar.activateTabSelection",
       "Vomnibar.activateEditUrl",
+      "Vomnibar.activateEditJiraUrl",      
+      "Vomnibar.activateEditUrlDomainOnly",      
       "Vomnibar.activateEditUrlInNewTab",
     ],
     findCommands: [
@@ -372,6 +379,8 @@ const Commands = {
       "moveTabToNewWindow",
       "closeTabsOnLeft",
       "closeTabsOnRight",
+      "closeTabsOfSameDomain",
+      "moveTabsWithDomainToNewWindow",
       "closeOtherTabs",
       "moveTabLeft",
       "moveTabRight",
@@ -394,10 +403,13 @@ const Commands = {
     "findSelectedBackwards",
     "goUp",
     "goToRoot",
+    "moveTabsWithDomainToNewWindow",    
     "LinkHints.activateModeWithQueue",
     "LinkHints.activateModeToDownloadLink",
     "Vomnibar.activateEditUrl",
     "Vomnibar.activateEditUrlInNewTab",
+    "Vomnibar.activateEditJiraUrl",    
+    "Vomnibar.activateEditUrlDomainOnly",    
     "LinkHints.activateModeToOpenIncognito",
     "LinkHints.activateModeToCopyLinkUrl",
     "goNext",
@@ -444,6 +456,11 @@ const defaultKeyMappings = {
   "]]": "goNext",
   "gf": "nextFrame",
   "gF": "mainFrame",
+  "sc": "switchToSFClassic",
+  "sl": "switchToSFLightning",  
+  "su": "toggleSFNoOverride",
+  "ee" : "gmailSearchCurrentEmail",
+  "eu" : "gmailUnreadPrimaryInbox",  
   "gu": "goUp",
   "gU": "goToRoot",
   "i": "enterInsertMode",
@@ -471,6 +488,9 @@ const defaultKeyMappings = {
   "B": "Vomnibar.activateBookmarksInNewTab",
   "ge": "Vomnibar.activateEditUrl",
   "gE": "Vomnibar.activateEditUrlInNewTab",
+  "gj": "Vomnibar.activateEditJiraUrl",
+  "gd": "Vomnibar.activateEditUrlDomainOnly",  
+
 
   // Navigating history
   "H": "goBack",
@@ -487,6 +507,7 @@ const defaultKeyMappings = {
   "g0": "firstTab",
   "g$": "lastTab",
   "W": "moveTabToNewWindow",
+  "gw": "moveTabsWithDomainToNewWindow",  
   "t": "createTab",
   "yt": "duplicateTab",
   "x": "removeTab",
@@ -565,6 +586,13 @@ const commandDescriptions = {
   goUp: ["Go up the URL hierarchy"],
   goToRoot: ["Go to root of current URL hierarchy"],
 
+  switchToSFClassic: ["Switch to Salesforce classic"],
+  switchToSFLightning: ["Switch to Salesforce lightning"],
+  toggleSFNoOverride: ["Toggles NoOverride flag in Salesforce"],
+
+  gmailSearchCurrentEmail: ["Searches all email from the current sender in gmail"],
+  gmailUnreadPrimaryInbox: ["Lists all unread emails in the primary inbox in gmail"],
+
   // Manipulating tabs
   nextTab: ["Go one tab right", { background: true }],
   previousTab: ["Go one tab left", { background: true }],
@@ -581,12 +609,15 @@ const commandDescriptions = {
   restoreTab: ["Restore closed tab", { background: true, repeatLimit: 20 }],
 
   moveTabToNewWindow: ["Move tab to new window", { background: true }],
+  moveTabsWithDomainToNewWindow: ["Move all tabs with the same domain to new window", { background: true, noRepeat: true }],  
   togglePinTab: ["Pin or unpin current tab", { background: true }],
   toggleMuteTab: ["Mute or unmute current tab", { background: true, noRepeat: true }],
 
   closeTabsOnLeft: ["Close tabs on the left", { background: true }],
   closeTabsOnRight: ["Close tabs on the right", { background: true }],
   closeOtherTabs: ["Close all other tabs", { background: true, noRepeat: true }],
+  closeTabsOfSameDomain: ["Close all tabs with the same domain as the current tab", {background: true, noRepeat: true}],
+
 
   moveTabLeft: ["Move tab to the left", { background: true }],
   moveTabRight: ["Move tab to the right", { background: true }],
@@ -604,6 +635,8 @@ const commandDescriptions = {
   "Vomnibar.activateBookmarks": ["Open a bookmark", { topFrame: true }],
   "Vomnibar.activateBookmarksInNewTab": ["Open a bookmark in a new tab", { topFrame: true }],
   "Vomnibar.activateEditUrl": ["Edit the current URL", { topFrame: true }],
+  "Vomnibar.activateEditJiraUrl": ["Open a JIRA ticket", { topFrame: true }],  
+  "Vomnibar.activateEditUrlDomainOnly": ["Edit the current URL", { topFrame: true }],  
   "Vomnibar.activateEditUrlInNewTab": ["Edit the current URL and open in a new tab", {
     topFrame: true,
   }],

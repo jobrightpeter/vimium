@@ -388,6 +388,14 @@ const BackgroundCommands = {
     await removeTabsRelative("both", request);
   },
 
+  async closeTabsOfSameDomain(request) {
+    await removeTabsOfSameDomain("after", request);
+  },
+
+  async moveTabsWithDomainToNewWindow(request) {
+    await moveTabsOfDomainToNewWindow("after", request);
+  },
+
   async visitPreviousTab({ count, tab }) {
     await BgUtils.tabRecency.init();
     let tabIds = BgUtils.tabRecency.getTabsByRecency();

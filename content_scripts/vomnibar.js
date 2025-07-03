@@ -56,6 +56,15 @@ const Vomnibar = {
     });
   },
 
+  activateEditJiraUrl(sourceFrameId) {
+    return this.open(sourceFrameId, {
+      completer: "omni",
+      selectFirst: false,
+      query: "https://365businessfinance.atlassian.net/browse/DEV-",
+      newTab: true
+    });
+  },  
+
   init() {
     if (!this.vomnibarUI) {
       this.vomnibarUI = new UIComponent("pages/vomnibar.html", "vomnibarFrame", function () {});
