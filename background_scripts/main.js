@@ -451,6 +451,48 @@ async function removeTabsRelative(direction, { count, tab }) {
   await chrome.tabs.remove(toRemove.map((t) => t.id));
 }
 
+// MY CHANGES START HERE XXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+async function removeTabsOfSameDomain(direction, { tab: activeTab }) {
+  if (!activeTab.url) return;
+
+  let domainName;
+  try {
+    const url = new URL(activeTab.url);
+    const hostName = url.hostname;
+    domainName = hostName.split('.').reverse().splice(0, 2).reverse().join('.').length <= 5
+      ? hostName.split('.').reverse().splice(0, 3).reverse().join('.')
+      : hostName.split('.').reverse().splice(0, 2).reverse().join('.');
+  } catch {
+    return; // Skip if current tab's URL is invalid
+  }
+
+  const tabs = await chrome.tabs.query({});
+
+  const toRemove = tabs.filter((tab) => {
+//    if (tab.pinned || tab.id === activeTab.id || !tab.url) return false;
+
+    try {
+      const tabUrl = new URL(tab.url);
+      const tabHostName = tabUrl.hostname;
+      const tabDomainName = tabHostName.split('.').reverse().splice(0, 2).reverse().join('.').length <= 5
+        ? tabHostName.split('.').reverse().splice(0, 3).reverse().join('.')
+        : tabHostName.split('.').reverse().splice(0, 2).reverse().join('.');
+      return tabDomainName === domainName;
+    } catch {
+      return false;
+    }
+  });
+  console.log(toRemove);
+
+  if (toRemove.length > 0) {
+    await chrome.tabs.remove(toRemove.map((t) => t.id));
+  }
+}
+
+
+// MY CHANGES END HERE XXXXXXXXXXXXXXXXXXXXXXXXXXX
+
 // Selects a tab before or after the currently selected tab.
 // - direction: "next", "previous", "first" or "last".
 function selectTab(direction, { count, tab }) {
