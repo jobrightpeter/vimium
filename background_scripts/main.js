@@ -393,7 +393,7 @@ const BackgroundCommands = {
   },
 
   async moveTabsWithDomainToNewWindow(request) {
-    await moveTabsOfDomainToNewWindow("after", request);
+    await moveTabsOfDomainToNewWindow(request);
   },
 
   async visitPreviousTab({ count, tab }) {
@@ -487,6 +487,54 @@ async function removeTabsOfSameDomain(direction, { tab: activeTab }) {
 
   if (toRemove.length > 0) {
     await chrome.tabs.remove(toRemove.map((t) => t.id));
+  }
+}
+
+async function moveTabsOfDomainToNewWindow({ tab: activeTab }) {
+  if (!activeTab.url) return;
+
+  // Step 1: Extract the domain of the active tab
+  let domainName;
+  try {
+    const url = new URL(activeTab.url);
+    const hostName = url.hostname;
+    domainName = hostName.split('.').reverse().splice(0, 2).reverse().join('.').length <= 5
+      ? hostName.split('.').reverse().splice(0, 3).reverse().join('.')
+      : hostName.split('.').reverse().splice(0, 2).reverse().join('.');
+  } catch {
+    return; // Skip if active tab URL is invalid
+  }
+
+  // Step 2: Get all tabs
+  const tabs = await chrome.tabs.query({});
+
+  // Step 3: Identify tabs to move
+  const tabsToMove = tabs.filter((tab) => {
+    if (tab.pinned || !tab.url) return false;
+    try {
+      const tabUrl = new URL(tab.url);
+      const tabHostName = tabUrl.hostname;
+      const tabDomainName = tabHostName.split('.').reverse().splice(0, 2).reverse().join('.').length <= 5
+        ? tabHostName.split('.').reverse().splice(0, 3).reverse().join('.')
+        : tabHostName.split('.').reverse().splice(0, 2).reverse().join('.');
+      return tabDomainName === domainName;
+    } catch {
+      return false;
+    }
+  });
+
+  // Step 4: Create new window and move the tabs
+  if (tabsToMove.length > 0) {
+    const [firstTab, ...remainingTabs] = tabsToMove;
+    chrome.windows.create({ tabId: firstTab.id, incognito: firstTab.incognito }, (newWindow) => {
+      if (chrome.runtime.lastError || !newWindow) return;
+      if (remainingTabs.length > 0) {
+        chrome.tabs.move(
+          remainingTabs.map((t) => t.id),
+          { windowId: newWindow.id, index: -1 }
+        );
+      }
+    });
   }
 }
 
