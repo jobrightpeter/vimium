@@ -65,6 +65,22 @@ const Vomnibar = {
     });
   },  
 
+// MY CHANGES START HERE XXXXXXXXXXXX
+
+  activateEditUrlDomainOnly(sourceFrameId) {
+    const pttrn = /^(https?:\/\/)?(www\.)?([^\/]+)/gm;
+    const urlInfo = pttrn.exec(globalThis.location.href);
+    const baseUrl = urlInfo ? urlInfo[0] + '/' : globalThis.location.origin + '/';
+
+    this.open(sourceFrameId, {
+      completer: "omni",
+      selectFirst: false,
+      query: baseUrl,
+    });
+  },
+
+// MY CHANGES END HERE XXXXXXXXXXXX
+
   init() {
     if (!this.vomnibarUI) {
       this.vomnibarUI = new UIComponent("pages/vomnibar.html", "vomnibarFrame", function () {});

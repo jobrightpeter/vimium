@@ -412,6 +412,7 @@ if (typeof Vomnibar !== "undefined") {
     "Vomnibar.activateEditUrl": Vomnibar.activateEditUrl.bind(Vomnibar),
     "Vomnibar.activateEditUrlInNewTab": Vomnibar.activateEditUrlInNewTab.bind(Vomnibar),
     "Vomnibar.activateEditJiraUrl": Vomnibar.activateEditJiraUrl.bind(Vomnibar),    
+    "Vomnibar.activateEditUrlDomainOnly": Vomnibar.activateEditUrlDomainOnly.bind(Vomnibar)
   });
 }
 
