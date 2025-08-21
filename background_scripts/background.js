@@ -11,3 +11,4 @@ import "../background_scripts/completion.js";
 import "../background_scripts/tab_operations.js";
 import "../background_scripts/marks.js";
 import "../background_scripts/main.js";
+import "../background_scripts/window_cycle.js";

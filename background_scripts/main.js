@@ -302,6 +302,14 @@ const BackgroundCommands = {
   lastTab(request) {
     return selectTab("last", request);
   },
+  async nextWindow(_request, _sender) {
+    return WindowCycler.focusAdjacentWindow(+1);
+  },
+
+  async previousWindow(_request, _sender) {
+    return WindowCycler.focusAdjacentWindow(-1);
+  },
+
   async removeTab({ count, tab }) {
     await forCountTabs(count, tab, (tab) => {
       // In Firefox, Ctrl-W will not close a pinned tab, but on Chrome, it will. We try to be

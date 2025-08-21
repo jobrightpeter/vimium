@@ -388,6 +388,8 @@ const Commands = {
       "zoomIn",
       "zoomOut",
       "zoomReset",
+      "nextWindow",
+      "previousWindow",      
     ],
     misc: ["showHelp", "toggleViewSource"],
   },
@@ -518,6 +520,10 @@ const defaultKeyMappings = {
   "zo": "zoomOut",
   "z0": "zoomReset",
 
+  // Cycling through windows
+  "<c-[>": "previousWindow",
+  "<c-]>": "nextWindow",
+
   // Marks
   "m": "Marks.activateCreateMode",
   "`": "Marks.activateGotoMode",
@@ -536,6 +542,10 @@ const commandDescriptions = {
   scrollUp: ["Scroll up"],
   scrollLeft: ["Scroll left"],
   scrollRight: ["Scroll right"],
+
+  nextWindow: ["Focus the next Chrome window", { background: true, noRepeat: true }],
+  previousWindow: ["Focus the previous Chrome window", { background: true, noRepeat: true }],
+
 
   scrollToTop: ["Scroll to the top of the page"],
   scrollToBottom: ["Scroll to the bottom of the page", { noRepeat: true }],
@@ -649,3 +659,12 @@ const commandDescriptions = {
 };
 
 globalThis.Commands = Commands;
+
+// background_scripts/commands.js
+import "./window_cycle.js";
+
+globalThis.CommandHandlers = {
+  ...(globalThis.CommandHandlers || {}),
+  nextWindow:     () => WindowCycler.focusAdjacentWindow(+1),
+  previousWindow: () => WindowCycler.focusAdjacentWindow(-1),
+};
