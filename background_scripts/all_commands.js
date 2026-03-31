@@ -261,6 +261,36 @@ const allCommands = [
   },
 
   {
+    name: "switchToSFClassic",
+    desc: "Switch to Salesforce classic",
+    group: "navigation",
+  },
+
+  {
+    name: "switchToSFLightning",
+    desc: "Switch to Salesforce lightning",
+    group: "navigation",
+  },
+
+  {
+    name: "toggleSFNoOverride",
+    desc: "Toggles NoOverride flag in Salesforce",
+    group: "navigation",
+  },
+
+  {
+    name: "gmailSearchCurrentEmail",
+    desc: "Searches all email from the current sender in gmail",
+    group: "navigation",
+  },
+
+  {
+    name: "gmailUnreadPrimaryInbox",
+    desc: "Lists all unread emails in the primary inbox in gmail",
+    group: "navigation",
+  },
+
+  {
     name: "Marks.activateCreateMode",
     desc: "Create a new mark",
     details: "Do this by typing the key bound to this command, and then a letter. " +
@@ -354,6 +384,20 @@ const allCommands = [
   {
     name: "Vomnibar.activateEditUrlInNewTab",
     desc: "Edit the current URL and open in a new tab",
+    group: "vomnibar",
+    topFrame: true,
+  },
+
+  {
+    name: "Vomnibar.activateEditJiraUrl",
+    desc: "Open a JIRA ticket",
+    group: "vomnibar",
+    topFrame: true,
+  },
+
+  {
+    name: "Vomnibar.activateEditUrlDomainOnly",
+    desc: "Edit the current URL (domain only)",
     group: "vomnibar",
     topFrame: true,
   },
@@ -545,6 +589,22 @@ const allCommands = [
   },
 
   {
+    name: "closeTabsOfSameDomain",
+    desc: "Close all tabs with the same domain as the current tab",
+    group: "tabs",
+    background: true,
+    noRepeat: true,
+  },
+
+  {
+    name: "moveTabsWithDomainToNewWindow",
+    desc: "Move all tabs with the same domain to new window",
+    group: "tabs",
+    background: true,
+    noRepeat: true,
+  },
+
+  {
     name: "moveTabLeft",
     desc: "Move tab to the left",
     group: "tabs",
@@ -593,6 +653,22 @@ const allCommands = [
     group: "tabs",
     advanced: true,
     background: true,
+  },
+
+  {
+    name: "nextWindow",
+    desc: "Focus the next Chrome window",
+    group: "tabs",
+    background: true,
+    noRepeat: true,
+  },
+
+  {
+    name: "previousWindow",
+    desc: "Focus the previous Chrome window",
+    group: "tabs",
+    background: true,
+    noRepeat: true,
   },
 
   //

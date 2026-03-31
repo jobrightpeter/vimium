@@ -59,8 +59,6 @@ class UIComponent {
     shadowWrapper.className = "vimium-reset";
     this.shadowDOM = shadowWrapper.attachShadow({ mode: "open" });
     this.shadowDOM.appendChild(styleSheet);
-    // Allow a user's custom CSS to style iframe element inside this shadow DOM.
-    DomUtils.injectUserCss(this.shadowDOM);
     this.shadowDOM.appendChild(this.iframeElement);
 
     // Load the iframe and pass it a port via window.postMessage so we can communicate privately

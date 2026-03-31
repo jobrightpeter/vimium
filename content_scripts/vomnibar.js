@@ -58,6 +58,27 @@ const Vomnibar = {
     });
   },
 
+  activateEditJiraUrl(sourceFrameId) {
+    return this.open(sourceFrameId, {
+      completer: "omni",
+      selectFirst: false,
+      query: "https://365businessfinance.atlassian.net/browse/DEV-",
+      newTab: true,
+    });
+  },
+
+  activateEditUrlDomainOnly(sourceFrameId) {
+    const pttrn = /^(https?:\/\/)?(www\.)?([^\/]+)/gm;
+    const urlInfo = pttrn.exec(globalThis.location.href);
+    const baseUrl = urlInfo ? urlInfo[0] + '/' : globalThis.location.origin + '/';
+
+    this.open(sourceFrameId, {
+      completer: "omni",
+      selectFirst: false,
+      query: baseUrl,
+    });
+  },
+
   init() {
     if (!this.vomnibarUI) {
       this.vomnibarUI = new UIComponent();

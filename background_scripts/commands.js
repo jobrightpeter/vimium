@@ -430,6 +430,11 @@ const defaultKeyMappings = {
   "]]": "goNext",
   "gf": "nextFrame",
   "gF": "mainFrame",
+  "sc": "switchToSFClassic",
+  "sl": "switchToSFLightning",
+  "su": "toggleSFNoOverride",
+  "ee": "gmailSearchCurrentEmail",
+  "eu": "gmailUnreadPrimaryInbox",
   "gu": "goUp",
   "gU": "goToRoot",
   "i": "enterInsertMode",
@@ -457,6 +462,8 @@ const defaultKeyMappings = {
   "B": "Vomnibar.activateBookmarksInNewTab",
   "ge": "Vomnibar.activateEditUrl",
   "gE": "Vomnibar.activateEditUrlInNewTab",
+  "gj": "Vomnibar.activateEditJiraUrl",
+  "gd": "Vomnibar.activateEditUrlDomainOnly",
 
   // Navigating history
   "H": "goBack",
@@ -473,6 +480,7 @@ const defaultKeyMappings = {
   "g0": "firstTab",
   "g$": "lastTab",
   "W": "moveTabToNewWindow",
+  "gw": "moveTabsWithDomainToNewWindow",
   "t": "createTab",
   "yt": "duplicateTab",
   "x": "removeTab",
@@ -482,6 +490,10 @@ const defaultKeyMappings = {
   "zi": "zoomIn",
   "zo": "zoomOut",
   "z0": "zoomReset",
+
+  // Cycling through windows
+  "<c-[>": "previousWindow",
+  "<c-]>": "nextWindow",
 
   // Marks
   "m": "Marks.activateCreateMode",

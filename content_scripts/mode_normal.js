@@ -152,6 +152,49 @@ const NormalModeCommands = {
     globalThis.location.href = globalThis.location.origin;
   },
 
+  toggleSFNoOverride() {
+    const theUrl = window.location.href;
+    let newUrl = null;
+    if(theUrl.includes('nooverride')) {
+      newUrl = theUrl.replace('nooverride=1','');
+    }
+    else if(theUrl.includes('id=')) {
+      newUrl = window.location.origin + '/' + window.location.href.match(/id=.{15}/)[0].substring(3) + '?nooverride=1';
+    }
+
+    if( newUrl != null) {
+      window.location.href = newUrl;
+    }
+  },
+
+  gmailSearchCurrentEmail() {
+    let emailSpan = document.querySelectorAll('span.go')[0];
+    let emailSpan2 = document.querySelectorAll('span.gD')[0];
+    if(emailSpan) {
+      let email = emailSpan.outerText.replace('<','').replace('>','');
+      window.location.href = 'https://mail.google.com/mail/u/0/#search/' + email;
+    }
+    else if(emailSpan2) {
+      let email = emailSpan2.getAttribute('Email');
+      window.location.href = 'https://mail.google.com/mail/u/0/#search/' + email;
+    }
+    else {
+      window.location.href = 'https://mail.google.com/mail/u/0/#search/in%3Ainbox+is%3Aunread+category%3Aprimary';
+    }
+  },
+
+  gmailUnreadPrimaryInbox() {
+    window.location.href = 'https://mail.google.com/mail/u/0/#search/in%3Ainbox+is%3Aunread+category%3Aprimary';
+  },
+
+  switchToSFClassic() {
+    window.location.href = window.location.origin + "/ltng/switcher?destination=classic";
+  },
+
+  switchToSFLightning() {
+    window.location.href = window.location.origin + "/ltng/switcher?destination=lex-campaign";
+  },
+
   toggleViewSource() {
     chrome.runtime.sendMessage({ handler: "getCurrentTabUrl" }, function (url) {
       if (url.substr(0, 12) === "view-source:") {
@@ -361,6 +404,8 @@ const NormalModeCommands = {
   "Vomnibar.activateBookmarksInNewTab": Vomnibar.activateBookmarksInNewTab.bind(Vomnibar),
   "Vomnibar.activateEditUrl": Vomnibar.activateEditUrl.bind(Vomnibar),
   "Vomnibar.activateEditUrlInNewTab": Vomnibar.activateEditUrlInNewTab.bind(Vomnibar),
+  "Vomnibar.activateEditJiraUrl": Vomnibar.activateEditJiraUrl.bind(Vomnibar),
+  "Vomnibar.activateEditUrlDomainOnly": Vomnibar.activateEditUrlDomainOnly.bind(Vomnibar),
 
   "Marks.activateCreateMode": Marks.activateCreateMode.bind(Marks),
   "Marks.activateGotoMode": Marks.activateGotoMode.bind(Marks),

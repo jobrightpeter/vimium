@@ -11,6 +11,7 @@ import "../background_scripts/completion/search_wrapper.js";
 import "../background_scripts/completion/completers.js";
 import "../background_scripts/tab_operations.js";
 import * as marks from "../background_scripts/marks.js";
+import { focusAdjacentWindow } from "../background_scripts/window_cycle.js";
 
 import {
   BookmarkCompleter,
@@ -323,6 +324,12 @@ const BackgroundCommands = {
   lastTab(request) {
     return selectTab("last", request);
   },
+  async nextWindow(_request, _sender) {
+    return focusAdjacentWindow(+1);
+  },
+  async previousWindow(_request, _sender) {
+    return focusAdjacentWindow(-1);
+  },
   async removeTab({ count, tab }) {
     await forCountTabs(count, tab, (tab) => {
       // In Firefox, Ctrl-W will not close a pinned tab, but on Chrome, it will. We try to be
@@ -409,6 +416,14 @@ const BackgroundCommands = {
     await removeTabsRelative("both", request);
   },
 
+  async closeTabsOfSameDomain(request) {
+    await removeTabsOfSameDomain("after", request);
+  },
+
+  async moveTabsWithDomainToNewWindow(request) {
+    await moveTabsOfDomainToNewWindow(request);
+  },
+
   async visitPreviousTab({ count, tab }) {
     await bgUtils.tabRecency.init();
     let tabIds = bgUtils.tabRecency.getTabsByRecency();
@@ -462,6 +477,78 @@ async function removeTabsRelative(direction, { count, tab }) {
   });
 
   await chrome.tabs.remove(toRemove.map((t) => t.id));
+}
+
+// Extracts the effective domain from a hostname (handles short TLDs like .co.uk)
+function extractDomain(hostname) {
+  const parts = hostname.split('.').reverse();
+  return parts.splice(0, 2).reverse().join('.').length <= 5
+    ? parts.splice(0, 3).reverse().join('.')
+    : parts.splice(0, 2).reverse().join('.');
+}
+
+async function removeTabsOfSameDomain(direction, { tab: activeTab }) {
+  if (!activeTab.url) return;
+
+  let domainName;
+  try {
+    const url = new URL(activeTab.url);
+    domainName = extractDomain(url.hostname);
+  } catch {
+    return;
+  }
+
+  const tabs = await chrome.tabs.query({});
+
+  const toRemove = tabs.filter((tab) => {
+    try {
+      const tabUrl = new URL(tab.url);
+      return extractDomain(tabUrl.hostname) === domainName;
+    } catch {
+      return false;
+    }
+  });
+
+  if (toRemove.length > 0) {
+    await chrome.tabs.remove(toRemove.map((t) => t.id));
+  }
+}
+
+async function moveTabsOfDomainToNewWindow({ tab: activeTab }) {
+  if (!activeTab.url) return;
+
+  let domainName;
+  try {
+    const url = new URL(activeTab.url);
+    domainName = extractDomain(url.hostname);
+  } catch {
+    return;
+  }
+
+  const tabs = await chrome.tabs.query({});
+
+  const tabsToMove = tabs.filter((tab) => {
+    if (tab.pinned || !tab.url) return false;
+    try {
+      const tabUrl = new URL(tab.url);
+      return extractDomain(tabUrl.hostname) === domainName;
+    } catch {
+      return false;
+    }
+  });
+
+  if (tabsToMove.length > 0) {
+    const [firstTab, ...remainingTabs] = tabsToMove;
+    chrome.windows.create({ tabId: firstTab.id, incognito: firstTab.incognito }, (newWindow) => {
+      if (chrome.runtime.lastError || !newWindow) return;
+      if (remainingTabs.length > 0) {
+        chrome.tabs.move(
+          remainingTabs.map((t) => t.id),
+          { windowId: newWindow.id, index: -1 }
+        );
+      }
+    });
+  }
 }
 
 // Selects a tab before or after the currently selected tab.
