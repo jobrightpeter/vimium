@@ -479,12 +479,16 @@ async function removeTabsRelative(direction, { count, tab }) {
   await chrome.tabs.remove(toRemove.map((t) => t.id));
 }
 
-// Extracts the effective domain from a hostname (handles short TLDs like .co.uk)
+// Extracts the effective domain from a hostname (handles short TLDs like .co.uk).
+// Uses slice (non-mutating) rather than splice: a previous version spliced the TLD and SLD out of
+// `parts` while evaluating the condition, so the returned value was built from the leftover
+// subdomain labels (e.g. "www.amazon.in" and "www.figma.com" both became "www").
 function extractDomain(hostname) {
-  const parts = hostname.split('.').reverse();
-  return parts.splice(0, 2).reverse().join('.').length <= 5
-    ? parts.splice(0, 3).reverse().join('.')
-    : parts.splice(0, 2).reverse().join('.');
+  const parts = hostname.split(".").reverse();
+  const suffix = parts.slice(0, 2).join(".");
+  // A short two-label suffix like "co.uk" or "com.au" is treated as the TLD, so keep three labels.
+  const labelCount = suffix.length <= 5 ? 3 : 2;
+  return parts.slice(0, labelCount).reverse().join(".");
 }
 
 async function removeTabsOfSameDomain(direction, { tab: activeTab }) {
